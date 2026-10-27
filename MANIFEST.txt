@@ -1,0 +1,64 @@
+MORRYNET COMPLETE SETUP - V67.2 (FIFTH STRATEGY: MASTER PLAN + STRICT SL INVARIANT)
+Single-folder Windows delivery: embedded Python 3.13 + MT5 bridge
++ MorryNet terminal UI. No admin rights, no installs, no internet.
+
+Entry point : START_MORRYNET.bat (supervisor console - live bridge log)
+WebSocket   : ws://127.0.0.1:8765
+Terminal UI : http://127.0.0.1:8766/   (served by the bridge itself)
+Health      : http://127.0.0.1:8766/health
+Bridge      : app/mt5_bridge.py  (V67.0_STRICT_SL_INVARIANT_FRESHNESS_V66)
+Terminal    : MorryNet-Terminal-V67.html (V67.2: fifth strategy Master Plan + same V67 SL policy)
+Runtime     : runtime/python/    (user-space Python 3.13, nothing to install)
+Packages    : site-packages/     (MetaTrader5 5.0.5488, websockets 14.2,
+                                  numpy 2.5.1 - preinstalled, PYTHONPATH)
+Wheels      : offline_wheels/    (same packages as .whl + SHA256 verify)
+
+V67.2 FIFTH TRADING STRATEGY: MASTER PLAN (the Master Trade Plan card layer
+             from the first tab now fires as an independent fifth signal source)
+  V67.0 STRICT STOP-LOSS INVARIANT (the safety policy of this build)
+- BUY positions: an existing protective stop is NEVER moved lower.
+- SELL positions: an existing protective stop is NEVER moved higher.
+- First protective stop on a stop-less position is always allowed.
+- Broker minimum-distance (stops/freeze) rules may only cause a REFUSAL
+  of a tighter stop - they never silently re-widen risk. The V65-and-
+  earlier 'sl_widened_to_min_atr' widening behavior is removed.
+- If the broker rejects a safe modification, the rejection is reported
+  and the existing stop is retained; the SAME safe value is retried -
+  never a risk-widening replacement. Broker retcode 10025 (NO_CHANGES)
+  is treated as success.
+- Enforced at both broker-facing choke points: modify_position()
+  (terminal-initiated) and auto_modify_sl() (bridge ratchet/BE engine),
+  in both the Windows bridge and the terminal's embedded engine copy.
+
+FRESHNESS RECYCLE (V66.4 behavior carried forward)
+- After 8h of uptime the bridge exits with code 81 at a quiet moment
+  (never while an order is in flight). The supervisor relaunches a clean
+  copy instantly. Tuned state lives on disk (apex_bridge\,
+  browser_profile\) and is picked back up automatically.
+
+SUPERVISOR CONSOLE (START_MORRYNET.bat / SUPERVISE_BRIDGE.ps1)
+- LIVE bridge log in the window + mirrored to logs\bridge.log (rotated
+  at 20MB).
+- Any crash/exit: automatic restart after 3s (exit 81: instant).
+- Keys: N = stop the bridge, R = immediate clean restart.
+- Single-instance: a healthy running bridge is detected and reused
+  (stale listeners on 8765/8766 are cleared first).
+- Terminal window (Edge --app with persistent browser_profile\, default
+  browser fallback) opens automatically once /health answers.
+
+SYMBOL RESOLUTION (V67 improvements)
+- Short index symbols with broker account suffixes now canonicalize:
+  US30m -> US30, US500m -> US500, USTECm -> USTEC, UK100m -> UK100,
+  JP225m -> JP225 (XAUUSDm already worked; 4-letter bases untouched).
+- Alias families extended: USTECH, WS30, WALLSTREET30, SPXUSD, ...
+- NOT RESOLVED is reported with guidance (that broker/account does not
+  list the family - check Market Watch -> Symbols).
+
+Bundled local wheels (offline_wheels/, verified against PyPI):
+- numpy-2.5.1-cp313-cp313-win_amd64.whl
+  sha256: 6c3fe51bc6a16453d452997053454f309e8e0ed7b42d6b361ce4ac8c32913d74
+- metatrader5-5.0.5488-cp313-cp313-win_amd64.whl
+  sha256: 9c117b4fb9f6f05e924a37069e9c6a151d16594519f30dbf4ec0d548131f540d
+- websockets-14.2-cp313-cp313-win_amd64.whl
+  sha256: b439ea828c4ba99bb3176dc8d9b933392a2413c0f6b149fdcba48393f573377f
+Verify offline anytime with: offline_wheels\VERIFY_HASHES.bat
